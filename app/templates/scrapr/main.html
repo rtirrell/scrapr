@@ -49,6 +49,10 @@
         -webkit-box-shadow: 0px 0px 5px #888;
         box-shadow: 0px 0px 5px #888;
       }
+      
+      .tweet {
+        
+      }
       #tags {
         padding: 0;
       }
@@ -77,8 +81,9 @@
           // Clear, fill and show the tweets.
           $('#results').empty();
           $(data.results).each( function(i, v) {
-            $('#results').append('<div class="hidden">' + v.text + '</div>');
+            $('#results').append('<div class="hidden tweet">' + v.formatted_tweet + '</div>');
           });
+          
           $('#results div').show('normal');
 
           // Clear, fill, and show the tags.
