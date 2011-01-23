@@ -52,7 +52,10 @@
       }
       
       .tweet {
-        
+        -moz-box-shadow: 0px 0px 2px #888;
+        -webkit-box-shadow: 0px 0px 2px #888;
+        box-shadow: 0px 0px 2px #888;
+        padding: 1%;
       }
       #tags {
         padding: 0;
@@ -77,6 +80,8 @@
     <!--[if lt IE 9]> <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script> <![endif]-->
     <script type='text/javascript'>
       function post_search(post_data) {
+        // Post with jQuery. The first two paramaters are the url and data, the third is the
+        // callback function, which we anonymously define inline.
         $.post($('form').attr('action'), post_data, function(data) {
 
           // Clear, fill and show the tweets.
@@ -87,8 +92,10 @@
           
           $('#results div').show('normal');
 
-          // Clear, fill, and show the tags.
+          // Create the new chart.
           $('#tags').empty();
+          
+          // The rest is just chart boilerplate.
           var tag_data = new google.visualization.DataTable();
           tag_data.addColumn('string', 'Tag');
           tag_data.addColumn('number', 'Count')
@@ -99,12 +106,13 @@
             tag_data.setValue(i, 1, v[1]);
           });
 
+          // Add the chart to the DOM and draw it.
           var chart = new google.visualization.ColumnChart(document.getElementById('tags'));
           chart.draw(tag_data, {
             height: 400, title: 'Co-occurring tags'
           });
           
-          // Set bars clickable.
+          // Set bars clickable - clicking on one searches for that tag.
           google.visualization.events.addListener(chart, 'select', function() {
 		        var selection = chart.getSelection();
 		        post_search({'q': tag_data.getValue(selection[0].row, 0)});
@@ -117,6 +125,7 @@
       $(document).ready( function() {
         $('form').submit( function() {
           post_search($(this).serialize());
+          // Return false to prevent the default action - form submission.
           return false;
         });
       });
