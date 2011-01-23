@@ -6,4 +6,10 @@
 * python-twitter
 
 ## Install
-Probably easiest is to use pip to install anything.
+Probably easiest is to use pip to install the libraries.
+Then:
+    mkdir db
+    touch db/development.db
+    python manage.py syncdb
+    python manage.py runserver
+    python -c 'import webbrowser; webbrowser.open("http://localhost:8000/app/")'
