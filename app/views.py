@@ -68,8 +68,11 @@ def search(request):
       else:
         tags[name] = 1
   
-  # Convert the tag dictionary to a list of two-tuples, and sort it by the count descending.
-  response_data['tags'] = sorted(tags.items(), key = lambda kv: kv[1], reverse = True)
+  # Convert the tag dictionary to a list of two-tuples, filter out tags with count = 1, 
+  # and sort it by the count descending.
+  response_data['tags'] = sorted(
+    [i for i in tags.items() if i[1] > 1], key = lambda kv: kv[1], reverse = True
+  )
   return http.HttpResponse(simplejson.dumps(response_data), mimetype = 'application/json')
   
   

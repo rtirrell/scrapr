@@ -6,6 +6,7 @@
     <title>Scrapr</title>
     <meta charset='utf-8' />
 
+    <link rel='stylesheet' type='text/css' href='https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/themes/flick/jquery-ui.css' />
     <style>
       body {
         font-family: Arial;
@@ -15,10 +16,7 @@
       article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
         display: block;
       }
-      #wrap {
-        margin: auto;
-        width: 90%;
-        padding: 1%;
+      #tabs {
         -moz-box-shadow: 0px 0px 5px #888;
         -webkit-box-shadow: 0px 0px 5px #888;
         box-shadow: 0px 0px 5px #888;
@@ -28,31 +26,26 @@
       form {
         margin: 1%;
       }
-      #head {
-        font-size: 2em;
-        color: #14e;
-        font-weight: bold;
-        margin: 2%;
-      }
       #results {
         float: left;
-        width: 45%;
+        width: 55%;
       }
       #tag-wrap {
         padding: 1%;
         float: right;
-        width: 50%;
+        width: 40%;
         -moz-box-shadow: 0px 0px 5px #888;
         -webkit-box-shadow: 0px 0px 5px #888;
         box-shadow: 0px 0px 5px #888;
+        display: none;
       }
       .tweet {
         -moz-box-shadow: 0px 0px 1px #888;
         -webkit-box-shadow: 0px 0px 1px #888;
         box-shadow: 0px 0px 1px #888;
         padding: 1%;
-        font-size: 0.8em;
         clear: both;
+        display: none;
       }
       .profile-image {
         float: left;
@@ -61,9 +54,18 @@
       .tweet-text {
         float: right;
         width: 85%;
+        font-size: 0.85em;
       }
-      #tags {
-        padding: 0;
+      .tweet-text a {
+        color: #0073ea;
+      }
+      .tweet-text a:hover {
+        color: red;
+      }
+      .user, .date {
+        font-size: 0.8em;
+        font-style: italic;
+        color: #789;
       }
       .hidden {
         display: none;
@@ -71,14 +73,7 @@
       .clear {
         clear: both;
       }
-      .user, .date {
-        font-size: 0.8em;
-        font-style: italic;
-        color: #789;
-      }
     </style>
-    
-    <link rel='stylesheet' type='text/css' href='https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/themes/flick/jquery-ui.css' />
     <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js'>
     </script>
     <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-ui.min.js'>
@@ -97,7 +92,7 @@
           // Clear, fill and show the tweets.
           $('#results').empty();
           $(data.results).each( function(i, v) {
-            $('#results').append('<div class="hidden tweet"></div>');
+            $('#results').append('<div class="tweet"></div>');
             $('#results .tweet:last').append('<div class="profile-image"><img src="' + v.user.profile_image_url + '" /></div>');
             $('#results .tweet:last').append('<div class="tweet-text">' + v.formatted_tweet + '<br /></div>');
             $('#results .tweet div:last').append('<span class="user">' + v.formatted_screen_name + '</span> ')
@@ -107,7 +102,7 @@
           $('#results div').show('normal');
 
           // Create the new chart.
-          $('#tags').empty();
+          $('#tags').empty().parent().show();
 
           // The rest is just chart boilerplate.
           var tag_data = new google.visualization.DataTable();
@@ -132,55 +127,56 @@
             $('form').submit();
           });
         });
-      // Return false to prevent the default action - form submission.
+        // Return false to prevent the default action - form submission.
         return false;
       }
 
       $(document).ready( function() {
-	      // Intercept form submission.
+        // Intercept form submission.
         $('form').submit(post_search);
         $('#tabs').tabs({
           load: function(event, ui) {
-            $('a', ui.panel).click(function() {
+            $('a', ui.panel).click( function() {
               return false;
             });
-          } 
+          }
         });
-        
+
       });
       // Load the Visualization API and the piechart package.
       google.load('visualization', '1', {'packages': ['corechart']});
     </script>
   </head>
   <body>
-    <div id='wrap'>
       <div id='tabs'>
         <ul>
-          <li><a href='#search'>Scrapr</a></li>
-          <li><a href='#help'>Help</a></li>
+          <li>
+            <a href='#search'>Scrapr</a>
+          </li>
+          <li>
+            <a href='#help'>Help</a>
+          </li>
         </ul>
-      
-	      <div id='search'>
-		      <form method='POST' action='/app/search/'>
-		        <input type='search' name='q' placeholder='Enter term' autofocus />
-		        <input type='submit' value='Search' />
-		      </form>
-		      <div id='main-wrap'>
-		
-		        <div id='tag-wrap'>
-		          <div id='tags'>
-		
-		          </div>
-		        </div>
-		        <div id='results'>
-		        </div>
-		        <br class='clear' />
-		      </div>
-		    </div>
-		    <div id='help'>
-		      Do som estuff.
-		    </div>
-		  </div>
-    </div>
+        <div id='search'>
+          <form method='POST' action='/app/search/'>
+            <input type='search' name='q' placeholder='Enter term' autofocus />
+            <input type='submit' value='Search' />
+          </form>
+          <div id='main-wrap'>
+
+            <div id='tag-wrap'>
+              <div id='tags'>
+
+              </div>
+            </div>
+            <div id='results'>
+            </div>
+            <br class='clear' />
+          </div>
+        </div>
+        <div id='help'>
+          Do som estuff.
+        </div>
+      </div>
   </body>
 </html>
