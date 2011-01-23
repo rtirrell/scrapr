@@ -1,0 +1,78 @@
+{% load url from future %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Scrapr</title>
+    <meta charset='utf-8' />
+    
+    <style>
+      body {
+        font-family: Arial;
+        background-color: #fff7f7;
+      }
+      /* HTML5 fallback. */
+      article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
+        display: block;
+      }
+      #wrap {
+        margin: auto;
+        width: 60%;
+        padding: 5%;
+        margin-top: 5%;
+        text-align: center;
+        -moz-box-shadow: 0px 0px 5px #888;
+        -webkit-box-shadow: 0px 0px 5px #888;
+        box-shadow: 0px 0px 5px #888;
+        background-color: #fff;
+        opacity: 0.9;
+      }
+      .hidden {
+        display: none;
+      }
+      form {
+        margin-bottom: 1%;
+      }
+      
+      div#title {
+        font-size: 2em;
+        color: #d2e;
+        font-weight: bold;
+        margin: 5%;
+        margin-top: 0;
+      }
+    </style>
+    
+    <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js'>
+    </script>
+    <!-- IE < 9 HTML5 fallback. -->
+    <!--[if lt IE 9]> <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script> <![endif]-->
+    <script type='text/javascript'>
+    
+      $(document).ready( function() {
+        $('form').submit(function() {
+          var post_data = $(this).serialize();
+          $.post($(this).attr('action'), post_data, function(data) {
+            $('#results').empty();
+            for (i = 0; i < data.results.length; ++i) {
+              $('#results').append('<div class="hidden">' + data.results[i] + '</div>');
+            }
+            $('#results').children().show('normal');
+          });
+          // Prevent default action (submitting form).
+          return false;
+        });
+      });
+    </script>
+  </head>
+  <body>
+    <div id='wrap'>
+      <div id='title'>Scrapr</div>
+      <form method='POST' action='{% url "app:search" %}'>
+        <input type='search' name='q' />
+        <input type='submit' value='Search' />
+      </form>
+      <div id='results'>
+      </div>
+    </div>
+  </body>
+</html>
