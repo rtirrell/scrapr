@@ -1,5 +1,6 @@
 from django import http, shortcuts
 from django.utils import simplejson
+from django.utils.html import urlize
 import re
 import twitter
 
@@ -25,13 +26,15 @@ def main(request):
 def search(request):
   '''Handles a search request, returning a JSON object (much like python's dictionary).'''
   
-  def format_tweet(tweet):
-    '''Markup the raw text of a tweet with links to users and hashtags.'''
+  def format_content(content):
+    '''Markup the raw text of some content with links to users and hashtags.'''
     
     # '%23' is the percent-encoded version of '#'.
-    tweet = tag_re.sub(r'<a href="http://twitter.com/#!/search/%23\2">\1</a>', tweet)
-    tweet = user_re.sub(r'<a href="http://twitter.com/\1">\1</a>', tweet)
-    return tweet
+    content = tag_re.sub(r'<a href="http://twitter.com/#!/search/%23\2">\1</a>', content)
+    content = user_re.sub(r'<a href="http://twitter.com/\1">\1</a>', content)
+    
+    # Converts link-like text into an actual <a>.
+    return urlize(content)
   
   # Make sure that the view has the correct parameter - which is just 'q', the query.
   q = request.POST.get('q')
@@ -47,7 +50,9 @@ def search(request):
   # 'formatted_tweet' key to each result, containing the anchor markup from 'format_tweet'.
   for result in results:
     result_dict = result.AsDict()
-    result_dict['formatted_tweet'] = format_tweet(result_dict['text'])
+    result_dict['relative_created_at'] = result.relative_created_at
+    result_dict['formatted_screen_name'] = format_content('@' + result_dict['user']['screen_name'])
+    result_dict['formatted_tweet'] = format_content(result_dict['text'])
     
     response_data['results'].append(result_dict)
     

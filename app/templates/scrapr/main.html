@@ -18,8 +18,7 @@
       #wrap {
         margin: auto;
         width: 90%;
-        padding: 3%;
-        margin-top: 5%;
+        padding: 1%;
         -moz-box-shadow: 0px 0px 5px #888;
         -webkit-box-shadow: 0px 0px 5px #888;
         box-shadow: 0px 0px 5px #888;
@@ -27,21 +26,18 @@
         opacity: 0.9;
       }
       form {
-        margin-left: 2%;
-        margin-bottom: 1%;
+        margin: 1%;
       }
-      #title {
+      #head {
         font-size: 2em;
-        color: #d2e;
+        color: #14e;
         font-weight: bold;
         margin: 2%;
-        margin-top: 0;
       }
       #results {
         float: left;
         width: 45%;
       }
-      
       #tag-wrap {
         padding: 1%;
         float: right;
@@ -50,12 +46,21 @@
         -webkit-box-shadow: 0px 0px 5px #888;
         box-shadow: 0px 0px 5px #888;
       }
-      
       .tweet {
-        -moz-box-shadow: 0px 0px 2px #888;
-        -webkit-box-shadow: 0px 0px 2px #888;
-        box-shadow: 0px 0px 2px #888;
+        -moz-box-shadow: 0px 0px 1px #888;
+        -webkit-box-shadow: 0px 0px 1px #888;
+        box-shadow: 0px 0px 1px #888;
         padding: 1%;
+        font-size: 0.8em;
+        clear: both;
+      }
+      .profile-image {
+        float: left;
+        width: 10%;
+      }
+      .tweet-text {
+        float: right;
+        width: 85%;
       }
       #tags {
         padding: 0;
@@ -66,68 +71,82 @@
       .clear {
         clear: both;
       }
-      .link {
-        text-decoration: underline;
-        color: blue;
-        cursor: pointer;
+      .user, .date {
+        font-size: 0.8em;
+        font-style: italic;
+        color: #789;
       }
     </style>
+    
+    <link rel='stylesheet' type='text/css' href='https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/themes/flick/jquery-ui.css' />
     <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js'>
+    </script>
+    <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-ui.min.js'>
     </script>
     <script type="text/javascript" src="https://www.google.com/jsapi">
     </script>
     <!-- IE < 9 HTML5 fallback. -->
     <!--[if lt IE 9]> <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script> <![endif]-->
     <script type='text/javascript'>
-      function post_search(post_data) {
+      function post_search() {
+        var post_data = $(this).serialize();
         // Post with jQuery. The first two paramaters are the url and data, the third is the
         // callback function, which we anonymously define inline.
-        $.post($('form').attr('action'), post_data, function(data) {
+        $.post($(this).attr('action'), post_data, function(data) {
 
           // Clear, fill and show the tweets.
           $('#results').empty();
           $(data.results).each( function(i, v) {
-            $('#results').append('<div class="hidden tweet">' + v.formatted_tweet + '</div>');
+            $('#results').append('<div class="hidden tweet"></div>');
+            $('#results .tweet:last').append('<div class="profile-image"><img src="' + v.user.profile_image_url + '" /></div>');
+            $('#results .tweet:last').append('<div class="tweet-text">' + v.formatted_tweet + '<br /></div>');
+            $('#results .tweet div:last').append('<span class="user">' + v.formatted_screen_name + '</span> ')
+            $('#results .tweet div:last').append('<span class="date">' + v.relative_created_at + '</span>')
+            $('#results .tweet:last').append('<br class="clear" />');
           });
-          
           $('#results div').show('normal');
 
           // Create the new chart.
           $('#tags').empty();
-          
+
           // The rest is just chart boilerplate.
           var tag_data = new google.visualization.DataTable();
           tag_data.addColumn('string', 'Tag');
           tag_data.addColumn('number', 'Count')
           tag_data.addRows(data.tags.length);
-          
+
           $(data.tags).each( function(i, v) {
             tag_data.setValue(i, 0, v[0]);
             tag_data.setValue(i, 1, v[1]);
           });
-
           // Add the chart to the DOM and draw it.
           var chart = new google.visualization.ColumnChart(document.getElementById('tags'));
           chart.draw(tag_data, {
             height: 400, title: 'Co-occurring tags'
           });
-          
+
           // Set bars clickable - clicking on one searches for that tag.
           google.visualization.events.addListener(chart, 'select', function() {
-		        var selection = chart.getSelection();
-		        post_search({'q': tag_data.getValue(selection[0].row, 0)});
+            var selection = chart.getSelection();
+            $('input[type="search"]').val(tag_data.getValue(selection[0].row, 0));
+            $('form').submit();
           });
-          
         });
+      // Return false to prevent the default action - form submission.
+        return false;
       }
 
-      // Intercept form submission.
       $(document).ready( function() {
-        $('form').submit( function() {
-          post_search($(this).serialize());
-          // Return false to prevent the default action - form submission.
-          return false;
+	      // Intercept form submission.
+        $('form').submit(post_search);
+        $('#tabs').tabs({
+          load: function(event, ui) {
+            $('a', ui.panel).click(function() {
+              return false;
+            });
+          } 
         });
+        
       });
       // Load the Visualization API and the piechart package.
       google.load('visualization', '1', {'packages': ['corechart']});
@@ -135,24 +154,33 @@
   </head>
   <body>
     <div id='wrap'>
-      <div id='title'>
-        Scrapr
-      </div>
-      <form method='POST' action='/app/search/'>
-        <input type='search' name='q' />
-        <input type='submit' value='Search' />
-      </form>
-      <div id='main-wrap'>
-
-        <div id='tag-wrap'>
-          <div id='tags'>
-            
-          </div>
-        </div>
-        <div id='results'>
-        </div>
-        <br class='clear' />
-      </div>
+      <div id='tabs'>
+        <ul>
+          <li><a href='#search'>Scrapr</a></li>
+          <li><a href='#help'>Help</a></li>
+        </ul>
+      
+	      <div id='search'>
+		      <form method='POST' action='/app/search/'>
+		        <input type='search' name='q' placeholder='Enter term' autofocus />
+		        <input type='submit' value='Search' />
+		      </form>
+		      <div id='main-wrap'>
+		
+		        <div id='tag-wrap'>
+		          <div id='tags'>
+		
+		          </div>
+		        </div>
+		        <div id='results'>
+		        </div>
+		        <br class='clear' />
+		      </div>
+		    </div>
+		    <div id='help'>
+		      Do som estuff.
+		    </div>
+		  </div>
     </div>
   </body>
 </html>
