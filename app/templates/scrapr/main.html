@@ -4,7 +4,7 @@
   <head>
     <title>Scrapr</title>
     <meta charset='utf-8' />
-    
+
     <style>
       body {
         font-family: Arial;
@@ -16,62 +16,127 @@
       }
       #wrap {
         margin: auto;
-        width: 60%;
-        padding: 5%;
+        width: 90%;
+        padding: 3%;
         margin-top: 5%;
-        text-align: center;
         -moz-box-shadow: 0px 0px 5px #888;
         -webkit-box-shadow: 0px 0px 5px #888;
         box-shadow: 0px 0px 5px #888;
         background-color: #fff;
         opacity: 0.9;
       }
-      .hidden {
-        display: none;
-      }
       form {
+        margin-left: 2%;
         margin-bottom: 1%;
       }
-      
-      div#title {
+      #title {
         font-size: 2em;
         color: #d2e;
         font-weight: bold;
-        margin: 5%;
+        margin: 2%;
         margin-top: 0;
       }
+      #results {
+        float: left;
+        width: 45%;
+      }
+      
+      #tag-wrap {
+        padding: 1%;
+        float: right;
+        width: 50%;
+        -moz-box-shadow: 0px 0px 5px #888;
+        -webkit-box-shadow: 0px 0px 5px #888;
+        box-shadow: 0px 0px 5px #888;
+      }
+      #tags {
+        padding: 0;
+      }
+      .hidden {
+        display: none;
+      }
+      .clear {
+        clear: both;
+      }
+      .link {
+        text-decoration: underline;
+        color: blue;
+        cursor: pointer;
+      }
     </style>
-    
     <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js'>
+    </script>
+    <script type="text/javascript" src="https://www.google.com/jsapi">
     </script>
     <!-- IE < 9 HTML5 fallback. -->
     <!--[if lt IE 9]> <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script> <![endif]-->
     <script type='text/javascript'>
-    
-      $(document).ready( function() {
-        $('form').submit(function() {
-          var post_data = $(this).serialize();
-          $.post($(this).attr('action'), post_data, function(data) {
-            $('#results').empty();
-            for (i = 0; i < data.results.length; ++i) {
-              $('#results').append('<div class="hidden">' + data.results[i] + '</div>');
-            }
-            $('#results').children().show('normal');
+      function post_search(post_data) {
+        $.post($('form').attr('action'), post_data, function(data) {
+
+          // Clear, fill and show the tweets.
+          $('#results').empty();
+          $(data.results).each( function(i, v) {
+            $('#results').append('<div class="hidden">' + v.text + '</div>');
           });
-          // Prevent default action (submitting form).
+          $('#results div').show('normal');
+
+          // Clear, fill, and show the tags.
+          $('#tags').empty();
+          var tag_data = new google.visualization.DataTable();
+          tag_data.addColumn('string', 'Tag');
+          tag_data.addColumn('number', 'Count')
+          tag_data.addRows(data.tags.length);
+          
+          $(data.tags).each( function(i, v) {
+            tag_data.setValue(i, 0, v[0]);
+            tag_data.setValue(i, 1, v[1]);
+          });
+
+          var chart = new google.visualization.ColumnChart(document.getElementById('tags'));
+          chart.draw(tag_data, {
+            height: 400, title: 'Co-occurring tags'
+          });
+          
+          // Set bars clickable.
+          google.visualization.events.addListener(chart, 'select', function() {
+		        var selection = chart.getSelection();
+		        post_search({'q': tag_data.getValue(selection[0].row, 0)});
+          });
+          
+        });
+      }
+
+      // Intercept form submission.
+      $(document).ready( function() {
+        $('form').submit( function() {
+          post_search($(this).serialize());
           return false;
         });
       });
+      // Load the Visualization API and the piechart package.
+      google.load('visualization', '1', {'packages': ['corechart']});
     </script>
   </head>
   <body>
     <div id='wrap'>
-      <div id='title'>Scrapr</div>
+      <div id='title'>
+        Scrapr
+      </div>
       <form method='POST' action='{% url "app:search" %}'>
         <input type='search' name='q' />
         <input type='submit' value='Search' />
       </form>
-      <div id='results'>
+      <div id='main-wrap'>
+
+        <div id='tag-wrap'>
+          <div id='tags'>
+            
+          </div>
+        </div>
+        <div id='results'>
+        </div>
+        <br class='clear' />
       </div>
     </div>
   </body>
