@@ -108,7 +108,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
+    #'django.contrib.staticfiles',
     'scrapr.app',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
