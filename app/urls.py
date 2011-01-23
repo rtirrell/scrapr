@@ -1,4 +1,4 @@
-from django.conf.urls.defaults import *
+from django.conf.urls.defaults import * #@UnusedWildImport
 from scrapr.app import views as scrapr_views
 
 # Uncomment the next two lines to enable the admin:
