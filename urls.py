@@ -5,8 +5,9 @@ from django.conf.urls.defaults import * #@UnusedWildImport
 # admin.autodiscover()
 
 urlpatterns = patterns('',
-  # Example:
-	# (r'^scrapr/', include('scrapr.foo.urls')),
+  
+  # Namespaced includes allow you perform nice reverse url lookups. See
+  # http://docs.djangoproject.com/en/1.2/topics/http/urls/#including-other-urlconfs
 	(r'^app/', include('scrapr.app.urls', namespace = 'app', app_name = 'app')),
 	
 	# Uncomment the admin/doc line below to enable admin documentation:

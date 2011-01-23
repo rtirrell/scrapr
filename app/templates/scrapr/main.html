@@ -1,4 +1,5 @@
-{% load url from future %}
+{# Preserve compatibility with 1.2 - don't load this. #}
+{#{% load url from future %}#}
 <!DOCTYPE html>
 <html>
   <head>
@@ -128,7 +129,7 @@
       <div id='title'>
         Scrapr
       </div>
-      <form method='POST' action='{% url "app:search" %}'>
+      <form method='POST' action='/app/search/'>
         <input type='search' name='q' />
         <input type='submit' value='Search' />
       </form>
