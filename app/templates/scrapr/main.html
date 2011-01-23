@@ -6,11 +6,13 @@
     <title>Scrapr</title>
     <meta charset='utf-8' />
 
+    <!-- Load this first, as we want to override some styling. -->
     <link rel='stylesheet' type='text/css' href='https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/themes/flick/jquery-ui.css' />
     <style>
       body {
         font-family: Arial;
         background-color: #fff7f7;
+        font-size: 14px;
       }
       /* HTML5 fallback. */
       article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
@@ -49,11 +51,11 @@
       }
       .profile-image {
         float: left;
-        width: 10%;
+        width: 7%;
       }
       .tweet-text {
         float: right;
-        width: 85%;
+        width: 88%;
         font-size: 0.85em;
       }
       .tweet-text a {
@@ -66,9 +68,6 @@
         font-size: 0.8em;
         font-style: italic;
         color: #789;
-      }
-      .hidden {
-        display: none;
       }
       .clear {
         clear: both;
@@ -84,13 +83,17 @@
     <!--[if lt IE 9]> <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script> <![endif]-->
     <script type='text/javascript'>
       function post_search() {
-        var post_data = $(this).serialize();
-        // Post with jQuery. The first two paramaters are the url and data, the third is the
-        // callback function, which we anonymously define inline.
-        $.post($(this).attr('action'), post_data, function(data) {
+        // Post with jQuery. The first two paramaters are the url and the serialized form, 
+        // the third is the callback function, which we anonymously define inline.
+        $.post($(this).attr('action'), $(this).serialize(), function(data) {
 
-          // Clear, fill and show the tweets.
           $('#results').empty();
+          if (data.results.length == 0 || data.tags.length == 0) {
+            $('#results').append('<div style="padding-left: 5%;"><h3>No results!</h3></div>');
+            return;
+          }
+          
+          // Fill results and show the tweets.
           $(data.results).each( function(i, v) {
             $('#results').append('<div class="tweet"></div>');
             $('#results .tweet:last').append('<div class="profile-image"><img src="' + v.user.profile_image_url + '" /></div>');
@@ -132,9 +135,12 @@
       }
 
       $(document).ready( function() {
-        // Intercept form submission.
+        // Intercept form submission, handle it with the post_search function defined above.
         $('form').submit(post_search);
         $('#tabs').tabs({
+          
+          // We're not loading any content dynamically - we just want tabs for interface navigation.
+          // We return false in the click handler to prevent any other action.
           load: function(event, ui) {
             $('a', ui.panel).click( function() {
               return false;
@@ -143,7 +149,7 @@
         });
 
       });
-      // Load the Visualization API and the piechart package.
+      // Load the Visualization API.
       google.load('visualization', '1', {'packages': ['corechart']});
     </script>
   </head>
