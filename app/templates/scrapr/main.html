@@ -64,6 +64,9 @@
       .tweet-text a:hover {
         color: red;
       }
+      .tag {
+        
+      }
       .user, .date {
         font-size: 0.8em;
         font-style: italic;
@@ -85,6 +88,7 @@
       function post_search() {
         // Post with jQuery. The first two paramaters are the url and the serialized form, 
         // the third is the callback function, which we anonymously define inline.
+        window.location.hash = $('input[type="search"]').val();
         $.post($(this).attr('action'), $(this).serialize(), function(data) {
 
           $('#results').empty();
@@ -103,6 +107,12 @@
             $('#results .tweet:last').append('<br class="clear" />');
           });
           $('#results div').show('normal');
+		      $('.tag').click(function() {
+		        $('#dialog').attr('tag', $(this).text());
+		        $('#dialog').attr('href', $(this).attr('href'));
+		        $('#dialog').dialog('open');
+		        return false;
+		      })
 
           // Create the new chart.
           $('#tags').empty().parent().show();
@@ -137,6 +147,16 @@
       $(document).ready( function() {
         // Intercept form submission, handle it with the post_search function defined above.
         $('form').submit(post_search);
+        $('#dialog').dialog({autoOpen: false, buttons: [
+          {text: 'View on Twitter', click: function() {
+            window.location.href = $(this).attr('href');
+          }},
+	        {text: 'View Here', click: function() {
+            $('input[type="search"]').val($(this).attr('tag'));
+            $('form').submit();
+            $(this).dialog('close');
+          }}
+	      ]});
         $('#tabs').tabs({
           
           // We're not loading any content dynamically - we just want tabs for interface navigation.
@@ -147,6 +167,11 @@
             });
           }
         });
+        
+        if (window.location.hash != '') {
+          $('input[type="search"]').val(window.location.hash);
+          $('form').submit();
+        }
 
       });
       // Load the Visualization API.
@@ -174,6 +199,10 @@
               <div id='tags'>
 
               </div>
+            </div>
+            <div id='dialog' title='View Tag'>
+              Would you like to go to Twitter to view results for this tag, or change the current
+              term here?
             </div>
             <div id='results'>
             </div>

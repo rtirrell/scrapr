@@ -30,15 +30,16 @@ def search(request):
     '''Markup the raw text of some content with links to users and hashtags.'''
     
     # '%23' is the percent-encoded version of '#'.
-    content = tag_re.sub(r'<a href="http://twitter.com/#!/search/%23\2">\1</a>', content)
+    content = tag_re.sub(r'<a href="http://twitter.com/#!/search/%23\2" class="tag">\1</a>', content)
     content = user_re.sub(r'<a href="http://twitter.com/\1">\1</a>', content)
     
     # Converts link-like text into an actual <a>.
     return urlize(content)
   
-  # Make sure that the view has the correct parameter - which is just 'q', the query.
+  # Make sure that the view has the correct parameter - which is just 'q', the query. This cannot
+  # be the empty string.
   q = request.POST.get('q')
-  if q is None:
+  if not q:
     return http.HttpResponseBadRequest()
   
   # Fetch as many results as Twitter allows. python-twitter defaults to 15.
