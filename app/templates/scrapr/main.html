@@ -78,6 +78,9 @@
     </style>
     <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js'>
     </script>
+    <script type='text/javascript' src='http://github.com/cowboy/jquery-hashchange/raw/master/jquery.ba-hashchange.min.js'>
+      
+    </script>
     <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-ui.min.js'>
     </script>
     <script type="text/javascript" src="https://www.google.com/jsapi">
@@ -88,8 +91,7 @@
       function post_search() {
         // Post with jQuery. The first two paramaters are the url and the serialized form, 
         // the third is the callback function, which we anonymously define inline.
-        window.location.hash = $('input[type="search"]').val();
-        $.post($(this).attr('action'), $(this).serialize(), function(data) {
+        $.post($('form').attr('action'), $('form').serialize(), function(data) {
 
           $('#results').empty();
           if (data.results.length == 0 || data.tags.length == 0) {
@@ -100,7 +102,7 @@
           // Fill results and show the tweets.
           $(data.results).each( function(i, v) {
             $('#results').append('<div class="tweet"></div>');
-            $('#results .tweet:last').append('<div class="profile-image"><img src="' + v.user.profile_image_url + '" /></div>');
+            $('#results .tweet:last').append('<div class="profile-image"><img src="' + v.user.profile_image_url + '" title="' + v.user.screen_name + '"/></div>');
             $('#results .tweet:last').append('<div class="tweet-text">' + v.formatted_tweet + '<br /></div>');
             $('#results .tweet div:last').append('<span class="user">' + v.formatted_screen_name + '</span> ')
             $('#results .tweet div:last').append('<span class="date">' + v.relative_created_at + '</span>')
@@ -136,26 +138,30 @@
           // Set bars clickable - clicking on one searches for that tag.
           google.visualization.events.addListener(chart, 'select', function() {
             var selection = chart.getSelection();
-            $('input[type="search"]').val(tag_data.getValue(selection[0].row, 0));
-            $('form').submit();
+            window.location.hash = tag_data.getValue(selection[0].row, 0);
           });
         });
-        // Return false to prevent the default action - form submission.
-        return false;
       }
 
       $(document).ready( function() {
         // Intercept form submission, handle it with the post_search function defined above.
-        $('form').submit(post_search);
-        $('#dialog').dialog({autoOpen: false, buttons: [
-          {text: 'View on Twitter', click: function() {
-            window.location.href = $(this).attr('href');
-          }},
-	        {text: 'View Here', click: function() {
-            $('input[type="search"]').val($(this).attr('tag'));
-            $('form').submit();
-            $(this).dialog('close');
-          }}
+        $('form').submit(function() {
+          
+          // Ensure that the hash changes regardless of submission method (direct or click).
+          window.location.hash = $('input[type="search"]').val();
+	        
+	        // Return false to prevent the default action - form submission.
+	        return false;
+        });
+        $('#dialog').dialog({autoOpen: false, buttons: [{
+            text: 'View Here', click: function() {
+	            $(this).dialog('close');
+	            window.location.hash = $(this).attr('tag');
+	          }
+	        }, {
+	          text: 'View on Twitter', 
+	          click: function() {window.location.href = $(this).attr('href');}
+	        }
 	      ]});
         $('#tabs').tabs({
           
@@ -169,9 +175,15 @@
         });
         
         if (window.location.hash != '') {
-          $('input[type="search"]').val(window.location.hash);
-          $('form').submit();
+	        $('input[type="search"]').val(window.location.hash);
+	        post_search();
         }
+        
+        $(window).hashchange(function() {
+	        $('input[type="search"]').val(window.location.hash);
+	        post_search();
+        });
+        
 
       });
       // Load the Visualization API.
