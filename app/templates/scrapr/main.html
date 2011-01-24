@@ -64,9 +64,6 @@
       .tweet-text a:hover {
         color: red;
       }
-      .tag {
-        
-      }
       .user, .date {
         font-size: 0.8em;
         font-style: italic;
@@ -74,6 +71,9 @@
       }
       .clear {
         clear: both;
+      }
+      .tweet .profile-image img {
+        max-width: 50px;
       }
     </style>
     <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js'>
@@ -105,7 +105,7 @@
           // Fill results and show the tweets.
           $(data.results).each( function(i, v) {
             $('#results').append('<div class="tweet"></div>');
-            $('#results .tweet:last').append('<div class="profile-image"><img src="' + v.user.profile_image_url + '" title="' + v.user.screen_name + '"/></div>');
+            $('#results .tweet:last').append('<div class="profile-image"><img src="' + v.user.profile_image_url + '" title="' + v.user.screen_name + '" /></div>');
             $('#results .tweet:last').append('<div class="tweet-text">' + v.formatted_tweet + '<br /></div>');
             $('#results .tweet div:last').append('<span class="user">' + v.formatted_screen_name + '</span> ')
             $('#results .tweet div:last').append('<span class="date">' + v.relative_created_at + '</span>')
@@ -115,9 +115,16 @@
 		      $('.tag').click(function() {
 		        $('#dialog').attr('tag', $(this).text());
 		        $('#dialog').attr('href', $(this).attr('href'));
+		        $('#dialog').dialog('option', 'title', 'View ' + $(this).text());
 		        $('#dialog').dialog('open');
 		        return false;
-		      })
+		      });
+		      
+		      // Bind a simple hover effect on the tweet divs.
+	        $('.tweet').hover(
+            function() {$(this).animate({backgroundColor: '#ffc'}, 'fast');},
+            function() {$(this).animate({backgroundColor: '#fff'}, 'fast');}
+	        );
 
           // Create the new chart.
           $('#tags').empty().parent().show();
@@ -156,6 +163,7 @@
 	        // Return false to prevent the default action - form submission.
 	        return false;
         });
+        
         $('#dialog').dialog({autoOpen: false, buttons: [{
             text: 'View Here', click: function() {
 	            $(this).dialog('close');
@@ -163,9 +171,10 @@
 	          }
 	        }, {
 	          text: 'View on Twitter', 
-	          click: function() {window.location.href = $(this).attr('href');}
+	          click: function() {window.location = $(this).attr('href');}
 	        }
 	      ]});
+	      
         $('#tabs').tabs({
           
           // We're not loading any content dynamically - we just want tabs for interface navigation.
@@ -177,16 +186,17 @@
           }
         });
         
+        // Check for hash on initial load, e.g., from navigation actions.
         if (window.location.hash != '') {
 	        $('input[type="search"]').val(window.location.hash);
 	        post_search();
         }
         
+        // Bind any change in the window hash to initiate a new search.
         $(window).hashchange(function() {
 	        $('input[type="search"]').val(window.location.hash);
 	        post_search();
         });
-        
 
       });
       // Load the Visualization API.
@@ -215,9 +225,8 @@
 
               </div>
             </div>
-            <div id='dialog' title='View Tag'>
-              Would you like to go to Twitter to view results for this tag, or change the current
-              term here?
+            <div id='dialog'>
+              Would you like to view this tag on Twitter or view this tag here?
             </div>
             <div id='results'>
             </div>
