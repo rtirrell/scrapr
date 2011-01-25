@@ -1,12 +1,15 @@
 from django.conf.urls.defaults import * #@UnusedWildImport
-from django.views import generic as generic_views
+# For django >= 1.3.
+#from django.views import generic as generic_views
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
 # admin.autodiscover()
 
 urlpatterns = patterns('',
-  url(r'^$', generic_views.RedirectView.as_view(url = '/app/')),
+  # For django >= 1.3.
+  #url(r'^$', generic_views.RedirectView.as_view(url = '/app/')),
+  url(r'^$', 'django.views.generic.simple.redirect_to', {'url': '/app/', 'permanent': False}),
   
   # Namespaced includes allow you perform nice reverse url lookups. See
   # http://docs.djangoproject.com/en/1.2/topics/http/urls/#including-other-urlconfs
