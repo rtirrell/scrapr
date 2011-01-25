@@ -1,7 +1,10 @@
 # scrapr
 
+## Overview
+This project demonstrates the right and proper use of Django, python-twitter, jQuery, and Google's javascript visualization library.
+
 ## Requirements
-* django (any recent version should do)
+* django (any recent version should do, but we've only tested 1.2 and 1.3).
 * sqlite3 (strictly optional, but the admin requires it, and the admin is one of Django's great features)
 * python-twitter
 
