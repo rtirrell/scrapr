@@ -13,11 +13,8 @@ Probably easiest is to use pip to install the libraries.
 pip is a replacement for easy_install (and does much more besides).
 Installing pip (perhaps with sudo):
     easy_install pip
-Then:
+Then install the other dependencies, and:
     mkdir db
     python manage.py syncdb
     python manage.py runserver
     python -c 'import webbrowser; webbrowser.open("http://localhost:8000/app/")'
-
-Setup project from scratch
-Slides

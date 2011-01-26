@@ -6,7 +6,7 @@
     <title>Scrapr</title>
     <meta charset='utf-8' />
 
-    <!-- Load this first, as we want to override some styling. -->
+    <!-- Load this first, as we want to override some of the jQueryUI styling. -->
     <link rel='stylesheet' type='text/css' href='https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/themes/flick/jquery-ui.css' />
     <style>
       body {
@@ -14,10 +14,16 @@
         background-color: #fff7f7;
         font-size: 14px;
       }
-      /* HTML5 fallback. */
+      
+      /*
+       * HTML5 fallback - make degenerate browsers handle unknown elements correctly -- essentially,
+       * to treat them as divs.
+       */ 
       article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {
         display: block;
       }
+      
+      /* Fancy CSS3 shadow effect. */
       #tabs {
         -moz-box-shadow: 0px 0px 5px #888;
         -webkit-box-shadow: 0px 0px 5px #888;
@@ -76,33 +82,45 @@
         max-width: 50px;
       }
     </style>
+    
     <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js'>
     </script>
     
-    <!-- Fallback for browsers not firing hashchange events. -->
+    <!-- Fallback for browsers not firing hashchange events. Load after jQuery. -->
     <script type='text/javascript' src='http://github.com/cowboy/jquery-hashchange/raw/master/jquery.ba-hashchange.min.js'>
     </script>
     
     <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-ui.min.js'>
     </script>
     
+    <!-- Visualization library. -->
     <script type="text/javascript" src="https://www.google.com/jsapi">
     </script>
     <!-- IE < 9 HTML5 fallback. -->
     <!--[if lt IE 9]> <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script> <![endif]-->
     <script type='text/javascript'>
+      //
+      // Search for a tag.
+      //
       function post_search() {
+        //
         // Post with jQuery. The first two paramaters are the url and the serialized form, 
         // the third is the callback function, which we anonymously define inline.
+        //
         $.post($('#search form').attr('action'), $('#search form').serialize(), function(data) {
           
+          // Clear the results, and if we have no new ones, yell at the user.
           $('#results').empty();
           if (data.results.length == 0 || data.tags.length == 0) {
             $('#results').append('<div style="padding-left: 5%;"><h3>No results!</h3></div>');
             return;
           }
           
+          //
           // Fill results and show the tweets.
+          // This is pretty much boilerplate and boring, except that it shows off jQuery's
+          // selectors (especially ':last'). See the jQuery docs for many, many more.
+          //
           $(data.results).each( function(i, v) {
             $('#results').append('<div class="tweet"></div>');
             $('#results .tweet:last').append('<div class="profile-image"><img src="' + v.user.profile_image_url + '" title="' + v.user.screen_name + '" /></div>');
@@ -146,8 +164,14 @@
         });
       }
 
+      // 
+      // Run the inline function when the document is 'ready' (a custom jQuery event).
+      //
       $(document).ready( function() {
+        
+        //
         // Intercept form submission, handle it with the post_search function defined above.
+        //
         $('#search form').submit(function() {
           
           // Ensure that the hash changes regardless of submission method (direct or click).
@@ -157,25 +181,37 @@
 	        return false;
         });
         
+        //
+        // Initialize the click-tag dialog and setup the button handlers.
+        //
         $('#dialog').dialog({autoOpen: false, minWidth: 500, buttons: [{
             text: 'View Here', click: function() {
-              
               // Select the first tab.
               $('#tabs').tabs('select', 0);
+              
 	            $(this).dialog('close');
+	            
+	            // Set the new hash, which our hashchange handler will react to.
 	            window.location.hash = $(this).attr('tag');
             }
 	        }, {
             text: 'Save This Tag', click: function() {
+              // Simple POST to save the tag.
               $.post('/app/tags/', {tag: $(this).attr('tag')});
               $(this).dialog('close');
 	          }
 	        }, {
 	          text: 'View on Twitter', 
+	          
+	          // Go to twitter. This isn't foolproof (breaks modifier-click to open in new tab),
+	          // there's probably a better way.
 	          click: function() {window.location = $(this).attr('href');}
 	        }
 	      ]});
 	      
+	      //
+	      // Initialize the tab interface and setup the select handlers.
+	      //
         $('#tabs').tabs({
           select: function(event, ui) {
 	          if (ui.panel.id == 'saved-tags') {
@@ -189,21 +225,31 @@
           }
         });
         
+        
+        //
         // Check for hash on initial load, e.g., from navigation actions.
+        //
         if (window.location.hash != '') {
 	        $('input[type="search"]').val(window.location.hash);
 	        post_search();
         }
         
-        // Bind any change in the window hash to initiate a new search.
+        //
+        // Bind any change in the window hash to initiate a new search. 
+        // We use the hashchange plugin to support browers that do not fire this event per HTML5
+        // specification. 
+        //
         $(window).hashchange(function() {
 	        $('input[type="search"]').val(window.location.hash);
 	        post_search();
         });
         
-        
+        //
         // Bind a 'live' event handler that fires for all matching elements in the DOM now as well
         // as in the future.
+        // If we had just bound a click event handler, that would only handle clicks on elements
+        // with the class 'tag' that existed when the document was ready.
+        //
 	      $('.tag').live('click', function() {
 	        $('#dialog').attr('tag', $(this).text());
 	        $('#dialog').attr('href', $(this).attr('href'));
@@ -213,10 +259,14 @@
 	      });
 
       });
+      
       // Load the Visualization API.
       google.load('visualization', '1', {'packages': ['corechart']});
     </script>
   </head>
+  
+  
+  <!-- Scaffold layout. We build most of it with javascript. -->
   <body>
       <div id='tabs'>
         <ul>

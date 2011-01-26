@@ -31,11 +31,16 @@ def main(request):
 	Note that there are two types of generics, the 'old' function-based ones, and a newer, more
 	modular and extensible class-based version (Django 1.3+).
 	'''
+  if request.method != 'GET':
+    return http.HttpResponseNotAllowed(['GET'])
+  
   return shortcuts.render_to_response('app/main.html', {})
 
 def search(request):
   '''Handles a search request, returning a JSON object (much like python's dictionary).'''
   
+  if request.method != 'POST':
+    return http.HttpResponseNotAllowed(['POST'])
   
   # Make sure that the view has the correct parameter - which is just 'q', the query. This cannot
   # be the empty string.
@@ -77,20 +82,25 @@ def search(request):
   )
   return http.HttpResponse(simplejson.dumps(response_data), mimetype = 'application/json')
   
-# NEXT
 def tags(request):
+  '''Handles GET (get tags) and POST (create tag).'''
+  
   if request.method == 'POST':
     tag = request.POST.get('tag')
     if tag is None:
       return http.HttpResponseBadRequest()
+    
+    # No duplication checking - let them have what they want.
     Tag.objects.create(name = tag)
     return http.HttpResponse()
-    
+  
+  # Just dump every object in the db.
   elif request.method == 'GET':
     response_data = {'tags': []}
     for tag in Tag.objects.all():
       response_data['tags'].append(format_content(tag.name))
     return http.HttpResponse(simplejson.dumps(response_data), mimetype = 'application/json')
   
+  # They tried a disallowed method - bad.
   else:
     return http.HttpResponseNotAllowed(['POST', 'GET'])
