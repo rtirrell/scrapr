@@ -15,12 +15,9 @@ Installing pip (perhaps with sudo):
     easy_install pip
 Then:
     mkdir db
-    touch db/development.db
     python manage.py syncdb
     python manage.py runserver
     python -c 'import webbrowser; webbrowser.open("http://localhost:8000/app/")'
 
-Relative imports
 Setup project from scratch
-Add something
 Slides

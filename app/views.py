@@ -1,7 +1,7 @@
 from django import http, shortcuts
 from django.utils import simplejson
 from django.utils.html import urlize
-from scrapr.app.models import Tag
+from app.models import Tag
 import re
 import twitter
 
