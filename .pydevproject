@@ -11,4 +11,7 @@
 <pydev_pathproperty name="org.python.pydev.PROJECT_SOURCE_PATH">
 <path>/scrapr</path>
 </pydev_pathproperty>
+<pydev_pathproperty name="org.python.pydev.PROJECT_EXTERNAL_SOURCE_PATH">
+<path>/Users/rpt/src/Django-1.3-beta-1</path>
+</pydev_pathproperty>
 </pydev_project>

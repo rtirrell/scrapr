@@ -1,6 +1,7 @@
 from django import http, shortcuts
 from django.utils import simplejson
 from django.utils.html import urlize
+from scrapr.app.models import Tag
 import re
 import twitter
 
@@ -11,6 +12,15 @@ api = twitter.Api()
 tag_re = re.compile(r'(#([0-9A-Za-z_]+))')
 # Match users ('@user') in tweets.
 user_re = re.compile(r'(@[0-9A-Za-z_]+)')
+def format_content(content):
+  '''Markup the raw text of some content with links to users and hashtags.'''
+    
+  # '%23' is the percent-encoded version of '#'.
+  content = tag_re.sub(r'<a href="http://twitter.com/#!/search/%23\2" class="tag">\1</a>', content)
+  content = user_re.sub(r'<a href="http://twitter.com/\1">\1</a>', content)
+    
+  # Converts link-like text into an actual <a>.
+  return urlize(content)
 
 def main(request):
   '''Just renders the template.
@@ -26,15 +36,6 @@ def main(request):
 def search(request):
   '''Handles a search request, returning a JSON object (much like python's dictionary).'''
   
-  def format_content(content):
-    '''Markup the raw text of some content with links to users and hashtags.'''
-    
-    # '%23' is the percent-encoded version of '#'.
-    content = tag_re.sub(r'<a href="http://twitter.com/#!/search/%23\2" class="tag">\1</a>', content)
-    content = user_re.sub(r'<a href="http://twitter.com/\1">\1</a>', content)
-    
-    # Converts link-like text into an actual <a>.
-    return urlize(content)
   
   # Make sure that the view has the correct parameter - which is just 'q', the query. This cannot
   # be the empty string.
@@ -76,5 +77,20 @@ def search(request):
   )
   return http.HttpResponse(simplejson.dumps(response_data), mimetype = 'application/json')
   
+# NEXT
+def tags(request):
+  if request.method == 'POST':
+    tag = request.POST.get('tag')
+    if tag is None:
+      return http.HttpResponseBadRequest()
+    Tag.objects.create(name = tag)
+    return http.HttpResponse()
+    
+  elif request.method == 'GET':
+    response_data = {'tags': []}
+    for tag in Tag.objects.all():
+      response_data['tags'].append(format_content(tag.name))
+    return http.HttpResponse(simplejson.dumps(response_data), mimetype = 'application/json')
   
-
+  else:
+    return http.HttpResponseNotAllowed(['POST', 'GET'])

@@ -94,8 +94,8 @@
       function post_search() {
         // Post with jQuery. The first two paramaters are the url and the serialized form, 
         // the third is the callback function, which we anonymously define inline.
-        $.post($('form').attr('action'), $('form').serialize(), function(data) {
-
+        $.post($('#search form').attr('action'), $('#search form').serialize(), function(data) {
+          
           $('#results').empty();
           if (data.results.length == 0 || data.tags.length == 0) {
             $('#results').append('<div style="padding-left: 5%;"><h3>No results!</h3></div>');
@@ -112,13 +112,6 @@
             $('#results .tweet:last').append('<br class="clear" />');
           });
           $('#results div').show('normal');
-		      $('.tag').click(function() {
-		        $('#dialog').attr('tag', $(this).text());
-		        $('#dialog').attr('href', $(this).attr('href'));
-		        $('#dialog').dialog('option', 'title', 'View ' + $(this).text());
-		        $('#dialog').dialog('open');
-		        return false;
-		      });
 		      
 		      // Bind a simple hover effect on the tweet divs.
 	        $('.tweet').hover(
@@ -155,7 +148,7 @@
 
       $(document).ready( function() {
         // Intercept form submission, handle it with the post_search function defined above.
-        $('form').submit(function() {
+        $('#search form').submit(function() {
           
           // Ensure that the hash changes regardless of submission method (direct or click).
           window.location.hash = $('input[type="search"]').val();
@@ -164,10 +157,18 @@
 	        return false;
         });
         
-        $('#dialog').dialog({autoOpen: false, buttons: [{
+        $('#dialog').dialog({autoOpen: false, minWidth: 500, buttons: [{
             text: 'View Here', click: function() {
+              
+              // Select the first tab.
+              $('#tabs').tabs('select', 0);
 	            $(this).dialog('close');
 	            window.location.hash = $(this).attr('tag');
+            }
+	        }, {
+            text: 'Save This Tag', click: function() {
+              $.post('/app/tags/', {tag: $(this).attr('tag')});
+              $(this).dialog('close');
 	          }
 	        }, {
 	          text: 'View on Twitter', 
@@ -176,13 +177,15 @@
 	      ]});
 	      
         $('#tabs').tabs({
-          
-          // We're not loading any content dynamically - we just want tabs for interface navigation.
-          // We return false in the click handler to prevent any other action.
-          load: function(event, ui) {
-            $('a', ui.panel).click( function() {
-              return false;
-            });
+          select: function(event, ui) {
+	          if (ui.panel.id == 'saved-tags') {
+	            $.get('/app/tags/', {}, function(data) {
+	             $('#saved-tags').empty();
+	             $(data.tags).each(function(i, v) {
+	               $('#saved-tags').append('<p>' + v + '</p>');
+	             }); 
+	            });
+	          }
           }
         });
         
@@ -197,6 +200,17 @@
 	        $('input[type="search"]').val(window.location.hash);
 	        post_search();
         });
+        
+        
+        // Bind a 'live' event handler that fires for all matching elements in the DOM now as well
+        // as in the future.
+	      $('.tag').live('click', function() {
+	        $('#dialog').attr('tag', $(this).text());
+	        $('#dialog').attr('href', $(this).attr('href'));
+	        $('#dialog').dialog('option', 'title', 'View ' + $(this).text());
+	        $('#dialog').dialog('open');
+	        return false;
+	      });
 
       });
       // Load the Visualization API.
@@ -212,9 +226,12 @@
           <li>
             <a href='#help'>Help</a>
           </li>
+          <li>
+            <a href='#saved-tags'>Saved Tags</a>
+          </li>
         </ul>
         <div id='search'>
-          <form method='POST' action='/app/search/'>
+          <form method='POST' action='/app/tags/search/'>
             <input type='search' name='q' placeholder='Enter term' autofocus />
             <input type='submit' value='Search' />
           </form>

@@ -7,7 +7,8 @@ from scrapr.app import views as scrapr_views
 
 urlpatterns = patterns('',
   # These are 'named' urls -- search and main, respectively.
-  url(r'^search/$', scrapr_views.search, {}, 'search'),
+  url(r'^tags/$', scrapr_views.tags, {}, 'tags'),
+  url(r'^tags/search/$', scrapr_views.search, {}, 'search'),
   url(r'^$', scrapr_views.main, {}, 'main'),
     # Example:
 
