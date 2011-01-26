@@ -10,9 +10,17 @@ This project demonstrates the right and proper use of Django, python-twitter, jQ
 
 ## Install
 Probably easiest is to use pip to install the libraries.
+pip is a replacement for easy_install (and does much more besides).
+Installing pip (perhaps with sudo):
+    easy_install pip
 Then:
     mkdir db
     touch db/development.db
     python manage.py syncdb
     python manage.py runserver
     python -c 'import webbrowser; webbrowser.open("http://localhost:8000/app/")'
+
+Relative imports
+Setup project from scratch
+Add something
+Slides

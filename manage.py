@@ -1,4 +1,6 @@
-#!/usr/bin/env python
+#!/opt/local/bin/python2.6
+
+#/usr/bin/env python
 from django.core.management import execute_manager
 try:
     import settings # Assumed to be in the same directory.

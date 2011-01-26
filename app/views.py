@@ -21,7 +21,7 @@ def main(request):
 	Note that there are two types of generics, the 'old' function-based ones, and a newer, more
 	modular and extensible class-based version (Django 1.3+).
 	'''
-  return shortcuts.render_to_response('scrapr/main.html', {})
+  return shortcuts.render_to_response('app/main.html', {})
 
 def search(request):
   '''Handles a search request, returning a JSON object (much like python's dictionary).'''
