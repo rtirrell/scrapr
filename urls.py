@@ -1,8 +1,8 @@
-from django.conf.urls.defaults import * #@UnusedWildImport
+from django.conf.urls.defaults import * 
+
 # For django >= 1.3.
 #from django.views import generic as generic_views
 
-# NEXT.
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 admin.autodiscover()

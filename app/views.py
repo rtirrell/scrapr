@@ -90,6 +90,9 @@ def tags(request):
     if tag is None:
       return http.HttpResponseBadRequest()
     
+    if Tag.objects.filter(name = tag).count() == 1:
+      return http.HttpResponse(simplejson.dumps({'error': 'Not Unique'}), mimetype = 'application/json')
+      
     # No duplication checking - let them have what they want.
     Tag.objects.create(name = tag)
     return http.HttpResponse()
